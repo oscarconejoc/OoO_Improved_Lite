@@ -1,0 +1,52 @@
+MIXED MUL + FPU + VRAT BENCHMARK
+================================
+
+WORKLOAD
+--------
+Blocks                 : 32
+MUL ops                : 128
+FPU ops                : 128
+Vector arithmetic ops  : 128
+Specialized ops        : 384
+
+ORIGINAL
+--------
+Ticks                  : 983
+Dispatches             : 396
+Commits                : 396
+MUL completions        : 128
+FPU completions        : 128
+Vector completions     : 130
+Vector arith completed : 128
+IPC                    : 0.402848
+Specialized ops/tick   : 0.390641
+Correctness            : PASS
+
+IMPROVED
+--------
+Ticks                  : 407
+Dispatches             : 396
+Commits                : 396
+MUL completions        : 128
+FPU completions        : 128
+Vector completions     : 130
+Vector arith completed : 128
+IPC                    : 0.972973
+Specialized ops/tick   : 0.943489
+Correctness            : PASS
+
+COMPARISON
+----------
+Ticks saved                 : 576
+Tick reduction              : 58.60 %
+Microarchitectural speedup  : 2.4152x
+Relative IPC increase       : 141.52 %
+Specialized throughput inc. : 141.52 %
+
+NOTE
+----
+Synthetic stress benchmark designed to expose independent work to the
+pipelined scalar MUL, pipelined FPU and Improved vector subsystem.
+
+Ticks are CSim microarchitectural ticks and must not be interpreted
+directly as physical FPGA clock cycles.

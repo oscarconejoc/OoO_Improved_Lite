@@ -1,0 +1,32 @@
+SCALAR FP BARE-METAL BENCHMARK
+========================================
+
+ELF SHA256:
+237180AFF02E3D07EAF428FD13D5DAE8F6C684632D8D0ADCE6B7C33EE30C1B0C
+
+ORIGINAL
+--------
+Ticks   : 82452
+Commits : 44367
+IPC     : 0.538095
+AXPY    : PASS
+GEMM    : PASS
+
+IMPROVED
+--------
+Ticks   : 76295
+Commits : 44367
+IPC     : 0.581519
+AXPY    : PASS
+GEMM    : PASS
+
+COMPARACION
+-----------
+Ticks ahorrados       : 6157
+Reduccion de ticks    : 7.47 %
+Speedup               : 1.0807x
+Incremento relativo IPC: 8.07 %
+
+NOTA:
+Los ticks corresponden al modelo microarquitectonico en CSim.
+No deben interpretarse directamente como ciclos fisicos post-route.

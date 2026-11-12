@@ -1,0 +1,38 @@
+VECTOR VRAT DIRECTED MICROBENCHMARK
+===================================
+
+ORIGINAL
+--------
+Ticks              : 30
+Vector completions : 8
+VMUL dispatch      : 14
+VMUL complete      : 27
+VADD dispatch      : 18
+VADD complete      : 29
+Completion OoO     : NO
+
+IMPROVED
+--------
+Ticks              : 29
+Vector completions : 8
+VMUL dispatch      : 14
+VMUL complete      : 27
+VADD dispatch      : 15
+VADD complete      : 26
+Completion OoO     : YES
+
+OBSERVACION
+-----------
+El hecho de que VADD sea despachada antes de completar VMUL no basta
+por si solo para probar ejecucion simultanea, ya que la VIQ puede
+aceptar operaciones pendientes.
+
+La evidencia fuerte es el orden de completion:
+
+Improved:
+VADD complete (26) < VMUL complete (27)
+
+Original:
+VADD complete (29) > VMUL complete (27)
+
+Improved reduce ademas el dispatch de la VADD independiente en 3 ticks.

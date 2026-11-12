@@ -1,0 +1,231 @@
+static int suite_vector_long_64pairs() {
+    ap_uint<32> imem[OOO_IMEM_WORDS] = {0};
+    ap_uint<32> dmem[OOO_DMEM_WORDS] = {0};
+
+    // Fuentes constantes:
+    // v1 = {1,2,3,4}
+    // v2 = {10,20,30,40}
+    dmem[0] = 1;
+    dmem[1] = 2;
+    dmem[2] = 3;
+    dmem[3] = 4;
+
+    dmem[4] = 10;
+    dmem[5] = 20;
+    dmem[6] = 30;
+    dmem[7] = 40;
+
+    const uint32_t F6_ADD = 0b000000;
+    const uint32_t F6_MUL = 0b100101;
+
+    const int PAIRS = 64;
+    const int ARITH_OPS = PAIRS * 2;
+
+    std::vector<uint16_t> prog;
+
+    auto push32 = [&](uint32_t w) {
+        prog.push_back(w & 0xFFFF);
+        prog.push_back(w >> 16);
+    };
+
+    auto push16 = [&](uint16_t h) {
+        prog.push_back(h);
+    };
+
+    // ------------------------------------------------------------
+    // Setup RVV: e32,m1, vl=4
+    // ------------------------------------------------------------
+    push32(enc_vsetvli(1, 0, VTYPE_E32_M1));
+
+    // v1 = {1,2,3,4}
+    push32(enc_vec_mem(rv32i::Opcode::LOAD_FP, 1, 0));
+
+    // x2 = 16
+    push32(i_type(
+        rv32i::Opcode::OP_IMM,
+        2,
+        F3A::ADD_SUB,
+        0,
+        16
+    ));
+
+    // v2 = {10,20,30,40}
+    push32(enc_vec_mem(rv32i::Opcode::LOAD_FP, 2, 2));
+
+    // ------------------------------------------------------------
+    // 64 parejas.
+    //
+    // No existe RAW entre VMUL y VADD:
+    //
+    // VMUL -> v6 = v1 * v1 = {1,4,9,16}
+    // VADD -> v7 = v2 + v2 = {20,40,60,80}
+    //
+    // Se reutilizan v6/v7 en cada iteracion:
+    // eso crea dependencias WAW falsas entre iteraciones y estresa
+    // el renombrado vectorial.
+    // ------------------------------------------------------------
+    for (int i = 0; i < PAIRS; i++) {
+        push32(enc_op_v(
+            F6_MUL,
+            1,
+            1,
+            rvv_f3_opmvv,
+            6
+        ));
+
+        push32(enc_op_v(
+            F6_ADD,
+            2,
+            2,
+            rvv_f3_opivv,
+            7
+        ));
+    }
+
+    // Sentinel de fin de programa.
+    push16(0x0000);
+
+    // Copiar programa de halfwords a IMEM.
+    for (size_t i = 0; i < prog.size(); i++) {
+        uint32_t w = imem[i / 2].to_uint();
+
+        if ((i & 1) == 0)
+            w = (w & 0xFFFF0000u) | prog[i];
+        else
+            w = (w & 0x0000FFFFu) |
+                (uint32_t(prog[i]) << 16);
+
+        imem[i / 2] = w;
+    }
+
+    // ------------------------------------------------------------
+    // Se?ales del core.
+    // ------------------------------------------------------------
+    ap_uint<1> dv;
+    ap_uint<3> dt;
+    ap_uint<32> dp;
+
+    ap_uint<1> a0d,a1d,mdd,fpd,lsd,brd,vcd;
+    ap_uint<3> a0t,a1t,mdt,fpt,lst,brt,vct;
+
+    ap_uint<1> cv,cfp;
+    ap_uint<5> crd;
+    ap_uint<32> cval;
+
+    static ap_uint<32> vo[OOO_VEC_REGFILE_LEN];
+    ap_uint<1> halted;
+
+    // Reset.
+    riscv_soc_tick(
+        1, imem, dmem,
+        dv,dt,dp,
+        a0d,a0t,a1d,a1t,
+        mdd,mdt,fpd,fpt,
+        lsd,lst,brd,brt,vcd,vct,
+        cv,cfp,crd,cval,
+        vo,halted
+    );
+
+    int cycles = 0;
+    int commits = 0;
+    int dispatches = 0;
+    int vec_completions = 0;
+
+    const int MAX_CYCLES = 5000;
+
+    while (!halted && cycles < MAX_CYCLES) {
+        cycles++;
+
+        riscv_soc_tick(
+            0, imem, dmem,
+            dv,dt,dp,
+            a0d,a0t,a1d,a1t,
+            mdd,mdt,fpd,fpt,
+            lsd,lst,brd,brt,vcd,vct,
+            cv,cfp,crd,cval,
+            vo,halted
+        );
+
+        if (dv)  dispatches++;
+        if (cv)  commits++;
+        if (vcd) vec_completions++;
+    }
+
+    int fails = 0;
+
+    if (!halted) {
+        printf("FAIL  VECTOR LONG no termino\n");
+        fails++;
+    }
+
+    // ------------------------------------------------------------
+    // Validacion arquitectonica final.
+    // ------------------------------------------------------------
+    const uint32_t exp_mul[4] = {
+        1, 4, 9, 16
+    };
+
+    const uint32_t exp_add[4] = {
+        20, 40, 60, 80
+    };
+
+    for (int lane = 0; lane < 4; lane++) {
+        uint32_t got_mul =
+            vo[6 * OOO_VEC_LANES + lane].to_uint();
+
+        uint32_t got_add =
+            vo[7 * OOO_VEC_LANES + lane].to_uint();
+
+        if (got_mul != exp_mul[lane]) {
+            printf(
+                "FAIL  v6[%d]=%u esperado=%u\n",
+                lane, got_mul, exp_mul[lane]
+            );
+            fails++;
+        }
+
+        if (got_add != exp_add[lane]) {
+            printf(
+                "FAIL  v7[%d]=%u esperado=%u\n",
+                lane, got_add, exp_add[lane]
+            );
+            fails++;
+        }
+    }
+
+    double ipc =
+        cycles > 0
+        ? (double)commits / (double)cycles
+        : 0.0;
+
+    double arith_per_tick =
+        cycles > 0
+        ? (double)ARITH_OPS / (double)cycles
+        : 0.0;
+
+    double vec_completion_rate =
+        cycles > 0
+        ? (double)vec_completions / (double)cycles
+        : 0.0;
+
+    printf("\n");
+    printf("============================================================\n");
+    printf(" VECTOR LONG - 64 VMUL+VADD PAIRS\n");
+    printf("============================================================\n");
+
+    printf(" pairs              : %d\n", PAIRS);
+    printf(" vector arith ops   : %d\n", ARITH_OPS);
+    printf(" ticks              : %d\n", cycles);
+    printf(" dispatches         : %d\n", dispatches);
+    printf(" commits            : %d\n", commits);
+    printf(" vec completions    : %d\n", vec_completions);
+    printf(" IPC                : %.6f\n", ipc);
+    printf(" arith ops/tick     : %.6f\n", arith_per_tick);
+    printf(" vec complete/tick  : %.6f\n", vec_completion_rate);
+    printf(" correctness        : %s\n",
+           fails == 0 ? "PASS" : "FAIL");
+
+    printf("============================================================\n");
+
+    return fails;
+}

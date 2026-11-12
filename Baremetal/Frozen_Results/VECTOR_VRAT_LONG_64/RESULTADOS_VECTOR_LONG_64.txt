@@ -1,0 +1,43 @@
+VECTOR LONG MICROBENCHMARK - 64 VMUL+VADD PAIRS
+================================================
+
+WORKLOAD
+--------
+Pairs              : 64
+Vector arith ops   : 128
+
+ORIGINAL
+--------
+Ticks              : 398
+Dispatches         : 132
+Commits            : 132
+Vector completions : 130
+IPC                : 0.331658
+Arith ops/tick     : 0.321608
+Vec complete/tick  : 0.326633
+Correctness        : PASS
+
+IMPROVED
+--------
+Ticks              : 271
+Dispatches         : 132
+Commits            : 132
+Vector completions : 130
+IPC                : 0.487085
+Arith ops/tick     : 0.472325
+Vec complete/tick  : 0.479705
+Correctness        : PASS
+
+COMPARISON
+----------
+Ticks saved               : 127
+Tick reduction             : 31.91 %
+Microarchitectural speedup : 1.4686x
+Relative IPC increase      : 46.86 %
+Arith throughput increase  : 46.86 %
+Vec completion rate inc.   : 46.86 %
+
+NOTE
+----
+Ticks are microarchitectural CSim ticks and must not be interpreted
+directly as physical FPGA clock cycles.

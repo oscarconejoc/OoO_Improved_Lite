@@ -1,0 +1,554 @@
+=== [HLS] batería de verificación ===
+
+===============================================================
+  A. ISA (I+M+F+C) + RVV Fases 1-3
+===============================================================
+ciclo | evento
+------+------------------------------------------------
+    1 | DISPATCH d0  (pc=  0, tag 0)
+    2 | DISPATCH d1  (pc=  4, tag 1)
+    3 | DISPATCH d2  (pc=  8, tag 2)
+    3 | ALU0   completa d0  (tag 0)
+    4 | DISPATCH d3  (pc= 12, tag 3)
+    4 | ALU1   completa d1  (tag 1)
+    4 | COMMIT  x1  = 0x00000005
+    5 | DISPATCH d4  (pc= 16, tag 4)
+    5 | COMMIT  x2  = 0x0000000a
+    6 | DISPATCH d5  (pc= 20, tag 5)
+    6 | ALU0   completa d3  (tag 3)
+    7 | MULDIV completa d2  (tag 2)
+    8 | DISPATCH d6  (pc= 24, tag 6)
+    8 | ALU1   completa d4  (tag 4)
+    8 | LSU    completa d5  (tag 5)
+    8 | COMMIT  x3  = 0x00000032
+    9 | DISPATCH d7  (pc= 28, tag 7)
+    9 | COMMIT  x4  = 0x00000007
+   10 | DISPATCH d8  (pc= 32, tag 0)
+   10 | COMMIT  x5  = 0x00000039
+   11 | DISPATCH d9  (pc= 36, tag 1)
+   11 | BR     completa d7  (tag 7)
+   11 | COMMIT  x0  = 0x00000000
+   12 | DISPATCH d10 (pc= 40, tag 2)
+   12 | ALU0   completa d8  (tag 0)
+   12 | LSU    completa d6  (tag 6)
+   13 | DISPATCH d11 (pc= 48, tag 3)
+   13 | ALU1   completa d9  (tag 1)
+   13 | COMMIT  x6  = 0x00000039
+   14 | COMMIT  x0  = 0x00000000
+   15 | DISPATCH d12 (pc= 36, tag 0)
+   16 | DISPATCH d13 (pc= 40, tag 1)
+   17 | DISPATCH d14 (pc= 48, tag 2)
+   17 | ALU0   completa d12 (tag 0)
+   18 | DISPATCH d15 (pc= 52, tag 3)
+   18 | COMMIT  x7  = 0x00000001
+   19 | DISPATCH d16 (pc= 56, tag 4)
+   19 | COMMIT  x8  = 0x0000002c
+   20 | DISPATCH d17 (pc= 60, tag 5)
+   20 | COMMIT  x10 = 0x12345000
+   21 | DISPATCH d18 (pc= 64, tag 6)
+   21 | ALU0   completa d16 (tag 4)
+   22 | DISPATCH d19 (pc= 68, tag 7)
+   22 | ALU1   completa d17 (tag 5)
+   24 | DISPATCH d20 (pc= 72, tag 0)
+   24 | ALU0   completa d19 (tag 7)
+   24 | FPU    completa d18 (tag 6)
+   27 | DISPATCH d21 (pc= 76, tag 1)
+   27 | MULDIV completa d15 (tag 3)
+   27 | FPU    completa d20 (tag 0)
+   28 | COMMIT  x11 = 0x0000000a
+   29 | COMMIT  x12 = 0x00000005
+   30 | COMMIT  x20 = 0x00000003
+   31 | DISPATCH d22 (pc= 80, tag 2)
+   31 | FPU    completa d21 (tag 1)
+   31 | COMMIT  f1  = 0x40400000
+   32 | DISPATCH d23 (pc= 84, tag 3)
+   32 | COMMIT  x21 = 0x00000004
+   33 | COMMIT  f2  = 0x40800000
+   34 | COMMIT  f3  = 0x41400000
+   36 | DISPATCH d24 (pc= 88, tag 4)
+   36 | FPU    completa d22 (tag 2)
+   36 | LSU    completa d23 (tag 3)
+   37 | DISPATCH d25 (pc= 92, tag 5)
+   37 | COMMIT  f5  = 0x41c00000
+   38 | COMMIT  x0  = 0x0000000a
+   39 | LSU    completa d24 (tag 4)
+   40 | COMMIT  f6  = 0x41c00000
+   41 | DISPATCH d26 (pc= 96, tag 6)
+   41 | FPU    completa d25 (tag 5)
+   42 | COMMIT  x22 = 0x00000001
+   44 | DISPATCH d27 (pc=100, tag 7)
+   44 | FPU    completa d26 (tag 6)
+   45 | DISPATCH d28 (pc=104, tag 0)
+   45 | COMMIT  x23 = 0x41400000
+   46 | DISPATCH d29 (pc=108, tag 1)
+   47 | DISPATCH d30 (pc=110, tag 2)
+   47 | ALU0   completa d28 (tag 0)
+   48 | DISPATCH d31 (pc=114, tag 3)
+   48 | ALU1   completa d29 (tag 1)
+   49 | DISPATCH d32 (pc=116, tag 4)
+   49 | ALU0   completa d30 (tag 2)
+   50 | DISPATCH d33 (pc=120, tag 5)
+   50 | ALU1   completa d31 (tag 3)
+   51 | DISPATCH d34 (pc=124, tag 6)
+   53 | ALU0   completa d34 (tag 6)
+   53 | FPU    completa d27 (tag 7)
+   54 | DISPATCH d35 (pc=128, tag 7)
+   54 | COMMIT  f7  = 0x40800000
+   55 | DISPATCH d36 (pc=132, tag 0)
+   55 | COMMIT  x24 = 0x00000002
+   56 | DISPATCH d37 (pc=136, tag 1)
+   56 | COMMIT  x15 = 0x00000009
+   57 | DISPATCH d38 (pc=140, tag 2)
+   57 | COMMIT  x16 = 0x00000015
+   58 | DISPATCH d39 (pc=144, tag 3)
+   58 | ALU0   completa d37 (tag 1)
+   58 | COMMIT  x15 = 0x0000000c
+   59 | DISPATCH d40 (pc=148, tag 4)
+   59 | COMMIT  x19 = 0x00000004
+   60 | ALU0   completa d39 (tag 3)
+   63 | VEC    completa d33 (tag 5)
+   64 | DISPATCH d41 (pc=152, tag 5)
+   64 | COMMIT  x0  = 0x00000001
+   65 | DISPATCH d42 (pc=156, tag 6)
+   65 | COMMIT  x13 = 0x00000010
+   66 | ALU0   completa d41 (tag 5)
+   69 | VEC    completa d35 (tag 7)
+   70 | DISPATCH d43 (pc=160, tag 7)
+   70 | COMMIT  x0  = 0x40800000
+   71 | VEC    completa d36 (tag 0)
+   72 | DISPATCH d44 (pc=164, tag 0)
+   72 | ALU0   completa d43 (tag 7)
+   72 | COMMIT  x0  = 0x00000002
+   73 | DISPATCH d45 (pc=168, tag 1)
+   73 | COMMIT  x14 = 0x00000063
+   75 | VEC    completa d38 (tag 2)
+   76 | DISPATCH d46 (pc=172, tag 2)
+   76 | COMMIT  x0  = 0x00000015
+   77 | DISPATCH d47 (pc=176, tag 3)
+   77 | COMMIT  x17 = 0x0000004d
+   81 | VEC    completa d40 (tag 4)
+   82 | DISPATCH d48 (pc=180, tag 4)
+   82 | COMMIT  x0  = 0x00000004
+   83 | DISPATCH d49 (pc=184, tag 5)
+   83 | COMMIT  x18 = 0x00000020
+   87 | VEC    completa d42 (tag 6)
+   88 | DISPATCH d50 (pc=188, tag 6)
+   88 | COMMIT  x0  = 0x00000010
+   89 | VEC    completa d45 (tag 1)
+   89 | COMMIT  x26 = 0x00000002
+   90 | DISPATCH d51 (pc=192, tag 7)
+   90 | COMMIT  x27 = 0x00000002
+   91 | VEC    completa d47 (tag 3)
+   91 | COMMIT  x0  = 0x00000063
+   92 | DISPATCH d52 (pc=196, tag 0)
+   92 | COMMIT  x19 = 0x00000004
+   93 | DISPATCH d53 (pc=200, tag 1)
+   93 | VEC    completa d48 (tag 4)
+   93 | COMMIT  x0  = 0x0000004d
+   94 | DISPATCH d54 (pc=204, tag 2)
+   94 | COMMIT  x0  = 0x00000004
+   95 | ALU0   completa d53 (tag 1)
+   95 | VEC    completa d49 (tag 5)
+   96 | DISPATCH d55 (pc=208, tag 3)
+   96 | COMMIT  x0  = 0x00000020
+   97 | DISPATCH d56 (pc=212, tag 4)
+   97 | VEC    completa d50 (tag 6)
+   98 | DISPATCH d57 (pc=216, tag 5)
+   98 | COMMIT  x0  = 0x00000010
+   99 | DISPATCH d58 (pc=220, tag 6)
+   99 | ALU0   completa d56 (tag 4)
+  100 | ALU1   completa d57 (tag 5)
+  100 | LSU    completa d58 (tag 6)
+  101 | VEC    completa d51 (tag 7)
+  102 | DISPATCH d59 (pc=224, tag 7)
+  102 | COMMIT  x0  = 0x00000002
+  103 | VEC    completa d52 (tag 0)
+  104 | DISPATCH d60 (pc=228, tag 0)
+  104 | COMMIT  x0  = 0x00000002
+  105 | DISPATCH d61 (pc=232, tag 1)
+  105 | VEC    completa d54 (tag 2)
+  105 | COMMIT  x29 = 0x00000064
+  106 | DISPATCH d62 (pc=236, tag 2)
+  106 | COMMIT  x0  = 0x00000004
+  107 | VEC    completa d55 (tag 3)
+  108 | DISPATCH d63 (pc=240, tag 3)
+  108 | COMMIT  x0  = 0x0000004d
+  109 | DISPATCH d64 (pc=244, tag 4)
+  109 | COMMIT  x30 = 0x00000005
+  110 | DISPATCH d65 (pc=248, tag 5)
+  110 | COMMIT  x31 = 0x00000030
+  111 | COMMIT  x0  = 0x00000010
+  116 | VEC    completa d59 (tag 7)
+  117 | DISPATCH d66 (pc=252, tag 6)
+  117 | COMMIT  x0  = 0x00000002
+  121 | VEC    completa d60 (tag 0)
+  122 | DISPATCH d67 (pc=256, tag 7)
+  122 | COMMIT  x0  = 0x00000002
+  123 | DISPATCH d68 (pc=260, tag 0)
+  123 | VEC    completa d61 (tag 1)
+  124 | DISPATCH d69 (pc=264, tag 1)
+  124 | COMMIT  x0  = 0x00000064
+  125 | COMMIT  x28 = 0x00000010
+  141 | VEC    completa d63 (tag 3)
+  142 | DISPATCH d70 (pc=268, tag 2)
+  142 | COMMIT  x0  = 0x0000004d
+  143 | VEC    completa d64 (tag 4)
+  144 | DISPATCH d71 (pc=272, tag 3)
+  144 | COMMIT  x0  = 0x00000005
+  145 | COMMIT  x28 = 0x00000008
+  153 | VEC    completa d66 (tag 6)
+  154 | DISPATCH d72 (pc=276, tag 4)
+  154 | COMMIT  x0  = 0x00000010
+  155 | VEC    completa d67 (tag 7)
+  156 | DISPATCH d73 (pc=280, tag 5)
+  156 | COMMIT  x0  = 0x00000002
+  157 | VEC    completa d69 (tag 1)
+  157 | COMMIT  x28 = 0x00000004
+  158 | DISPATCH d74 (pc=284, tag 6)
+  158 | COMMIT  x0  = 0x00000064
+  159 | VEC    completa d70 (tag 2)
+  160 | DISPATCH d75 (pc=288, tag 7)
+  160 | COMMIT  x0  = 0x00000010
+  161 | VEC    completa d71 (tag 3)
+  162 | DISPATCH d76 (pc=292, tag 0)
+  162 | COMMIT  x0  = 0x0000004d
+  163 | VEC    completa d72 (tag 4)
+  164 | DISPATCH d77 (pc=296, tag 1)
+  164 | COMMIT  x0  = 0x00000005
+  165 | VEC    completa d73 (tag 5)
+  166 | DISPATCH d78 (pc=300, tag 2)
+  166 | COMMIT  x0  = 0x00000008
+  167 | VEC    completa d74 (tag 6)
+  168 | DISPATCH d79 (pc=304, tag 3)
+  168 | COMMIT  x0  = 0x00000010
+  169 | VEC    completa d75 (tag 7)
+  170 | COMMIT  x0  = 0x00000002
+  171 | VEC    completa d76 (tag 0)
+  172 | COMMIT  x0  = 0x00000004
+  173 | VEC    completa d77 (tag 1)
+  174 | COMMIT  x0  = 0x00000064
+  175 | VEC    completa d78 (tag 2)
+  176 | COMMIT  x29 = 0x00000003
+  177 | VEC    completa d79 (tag 3)
+  178 | COMMIT  x30 = 0x00000001
+------+------------------------------------------------
+Halted en el ciclo 178 (80 dispatches, 76 commits)
+
+OK    x1  = 0x00000005 (addi)
+OK    x2  = 0x0000000a (addi)
+OK    x3  = 0x00000032 (mul)
+OK    x4  = 0x00000007 (addi independiente del mul)
+OK    x5  = 0x00000039 (add dependiente del mul (RAW via CDB))
+OK    x6  = 0x00000039 (lw round-trip del sw)
+OK    x7  = 0x00000001 (beq tomado (99 nunca ejecuto))
+OK    x8  = 0x0000002c (link del jal)
+OK    x9  = 0x00000000 (instruccion saltada por jal)
+OK    x10 = 0x12345000 (lui)
+OK    x11 = 0x0000000a (div)
+OK    x12 = 0x00000005 (sub independiente del div)
+OK    x15 = 0x0000000c (C.LI + C.ADDI comprimidas)
+OK    x16 = 0x00000015 (addi de 32 bits en pc%4==2 (straddle))
+OK    x20 = 0x00000003 (addi (fuente de fcvt))
+OK    x21 = 0x00000004 (addi (fuente de fcvt))
+OK    x22 = 0x00000001 (feq.s f5==f6 (FP escribe banco entero))
+OK    x23 = 0x41400000 (fmv.x.w bits de 12.0f)
+OK    x24 = 0x00000002 (addi independiente del fdiv)
+OK    x13 = 0x00000010 (addi (base del segundo vle32.v))
+OK    x14 = 0x00000063 (addi independiente de vadd.vv)
+OK    x17 = 0x0000004d (addi independiente de vmul.vv)
+OK    x19 = 0x00000004 (vsetvli x19,x0 -> vl=VLMAX=4 (rs1=x0 pide el maximo))
+OK    x26 = 0x00000002 (addi (AVL para el segundo vsetvli))
+OK    x27 = 0x00000002 (vsetvli x27,x26 -> vl=min(AVL=2,VLMAX=4)=2 (largo dinamico))
+OK    x28 = 0x00000004 (vsetvli e32 al inicio de Fase 3 -> vl=VLMAX=4)
+OK    x29 = 0x00000003 (vcpop.m  sobre mascara 0b1110 -> 3 bits en 1)
+OK    x30 = 0x00000001 (vfirst.m sobre mascara 0b1110 -> primer bit en indice 1)
+OK    x18 = 0x00000020 (addi (direccion del vse32.v))
+OK    f1  = 0x40400000 (fcvt.s.w 3 -> 3.0)
+OK    f2  = 0x40800000 (fcvt.s.w 4 -> 4.0)
+OK    f3  = 0x41400000 (fmul.s 3*4 = 12.0)
+OK    f5  = 0x41c00000 (fmadd.s 3*4+12 = 24.0 (rs3))
+OK    f6  = 0x41c00000 (flw round-trip del fsw)
+OK    f7  = 0x40800000 (fdiv.s 12/3 = 4.0)
+OK    OOO: addi(pc12) antes que mul(pc8) (ciclos 6 < 7)
+OK    OOO: sub(pc56) antes que div(pc52) (ciclos 21 < 27)
+OK    OOO: addi(pc104) antes que fdiv(pc100) -- OOO cruzando bancos (ciclos 47 < 53)
+OK    OOO: addi(pc136) antes que vadd.vv(pc132) -- coprocesamiento (ciclos 58 < 71)
+OK    OOO: addi(pc144) antes que vmul.vv(pc140) -- coprocesamiento (ciclos 60 < 75)
+OK    dmem[16] = 57 (sw escribio al commit)
+OK    dmem[17] = 0x41C00000 (fsw escribio 24.0f al commit)
+OK    v1[0] = 0x0000000a
+OK    v1[1] = 0x00000014
+OK    v1[2] = 0x0000001e
+OK    v1[3] = 0x00000028
+OK    v2[0] = 0x00000001
+OK    v2[1] = 0x00000002
+OK    v2[2] = 0x00000003
+OK    v2[3] = 0x00000004
+OK    v3[0] = 0x0000000b
+OK    v3[1] = 0x00000016
+OK    v3[2] = 0x00000021
+OK    v3[3] = 0x0000002c
+OK    v4[0] = 0x00000064
+OK    v4[1] = 0x00000190
+OK    v4[2] = 0x00000384
+OK    v4[3] = 0x00000640
+OK    v5[0] = 0x0000000b
+OK    v5[1] = 0x00000016
+OK    v5[2] = 0x0000001e
+OK    v5[3] = 0x00000028
+OK    v6[0] = 0x00000000
+OK    v6[1] = 0x00000000
+OK    v6[2] = 0x00000002
+OK    v6[3] = 0x00000000
+OK    v7[0] = 0x0000000b
+OK    v7[1] = 0x00000016
+OK    v7[2] = 0x0000001f
+OK    v7[3] = 0x0000002c
+OK    v8[0] = 0x0000000a
+OK    v8[1] = 0x00000014
+OK    v8[2] = 0x0000001e
+OK    v8[3] = 0x00000028
+OK    v9[0] = 0x00000400
+OK    v9[1] = 0x00200000
+OK    v9[2] = 0xc0000000
+OK    v9[3] = 0x00000400
+OK    v10[0] = 0x0000000a
+OK    v10[1] = 0x0000000a
+OK    v10[2] = 0x0000000a
+OK    v10[3] = 0x0000000a
+OK    v11[0] = 0x0000000d
+OK    v11[1] = 0x00000017
+OK    v11[2] = 0x00000021
+OK    v11[3] = 0x0000002b
+OK    v12[0] = 0x0000006e
+OK    v12[1] = 0x00000078
+OK    v12[2] = 0x00000082
+OK    v12[3] = 0x0000008c
+OK    v13[0] = 0xfffffff6
+OK    v13[1] = 0xffffffec
+OK    v13[2] = 0xffffffe2
+OK    v13[3] = 0xffffffd8
+OK    v14[0] = 0x0000000b
+OK    v14[1] = 0x00000014
+OK    v14[2] = 0x00000021
+OK    v14[3] = 0x00000028
+OK    v15[0] = 0x0000000a
+OK    v15[1] = 0x00000014
+OK    v15[2] = 0x0000001e
+OK    v15[3] = 0x00000028
+OK    v16[0] = 0x0101010b
+OK    v16[1] = 0x01010115
+OK    v16[2] = 0x0101011f
+OK    v16[3] = 0x01010129
+OK    v17[0] = 0x0000000a
+OK    v17[1] = 0x00000014
+OK    v17[2] = 0x0000001e
+OK    v17[3] = 0x00000028
+OK    v18[0] = 0x0002000c
+OK    v18[1] = 0x00020016
+OK    v18[2] = 0x00020020
+OK    v18[3] = 0x0002002a
+OK    v19[0] = 0x0000000f
+OK    v20[0] = 0x00000000
+OK    v21[0] = 0x0000000e
+OK    v22[0] = 0x0000000e
+OK    v23[0] = 0x0000000e
+OK    v24[0] = 0x0000000a
+OK    v24[1] = 0x00000002
+OK    v24[2] = 0x0000001e
+OK    v24[3] = 0x00000004
+OK    v25[0] = 0x0000000a
+OK    v25[1] = 0x00000014
+OK    v25[2] = 0x0000001e
+OK    v25[3] = 0x00000028
+OK    v26[0] = 0x00000000
+OK    v26[1] = 0x00000001
+OK    v26[2] = 0x00000002
+OK    v26[3] = 0x00000003
+OK    v27[0] = 0x00000000
+OK    v27[1] = 0x00000000
+OK    v27[2] = 0x00000001
+OK    v27[3] = 0x00000002
+OK    dmem[32..47] = {11,22,33,44} (vse32.v round-trip, resuelto en cabeza del ROB)
+
+===============================================================
+  A2. RVV Fase 4: reducciones, permutaciones y punto fijo
+===============================================================
+      (termino en 45 ciclos)
+OK    v6[0] = 0x00000065 (vredsum.vs: v2[0]=1 + sum(v1)=100)
+OK    v7[0] = 0x00000028 (vredmax.vs: max(1, 10,20,30,40))
+OK    v8[0] = 0x00000000 (vredand.vs: 10 & 10&20&30&40)
+OK    v9[0] = 0x00000001 (vslideup.vi: el elemento 0 queda SIN TOCAR)
+OK    v9[1] = 0x0000000a (vslideup.vi: v9[1] = v1[0])
+OK    v9[2] = 0x00000014 (vslideup.vi: v9[2] = v1[1])
+OK    v9[3] = 0x0000001e (vslideup.vi: v9[3] = v1[2])
+OK    v10[0] = 0x00000014 (vslidedown.vi: v10[0] = v1[1])
+OK    v10[1] = 0x0000001e (vslidedown.vi)
+OK    v10[2] = 0x00000028 (vslidedown.vi)
+OK    v10[3] = 0x00000000 (vslidedown.vi: mas alla del vector -> 0)
+OK    v11[0] = 0x0000001e (vrgather.vi: todos toman v1[2])
+OK    v11[3] = 0x0000001e (vrgather.vi)
+OK    v12[0] = 0x0000000a (vcompress.vm: empaqueta v1[0] (mascara 0b0101))
+OK    v12[1] = 0x0000001e (vcompress.vm: y v1[2], CONSECUTIVOS)
+OK    v13[0] = 0xffffffff (vsaddu.vx: 10+0xFFFFFFFF SATURA al maximo)
+OK    v13[3] = 0xffffffff (vsaddu.vx satura)
+OK    v14[0] = 0x00000000 (vssubu.vx: 1-10 SATURA a 0 (no envuelve))
+OK    v14[3] = 0x00000000 (vssubu.vx satura)
+OK    v15[0] = 0x00000006 (vaadd.vv: (10+1)/2 con redondeo = 6)
+OK    v15[1] = 0x0000000b (vaadd.vv: (20+2)/2 = 11)
+OK    v15[2] = 0x00000011 (vaadd.vv: (30+3)/2 con redondeo = 17)
+OK    v15[3] = 0x00000016 (vaadd.vv: (40+4)/2 = 22)
+
+===============================================================
+  A3. RVV Fase 5: strided, indexado, segmentado, fof, reg. completo
+===============================================================
+      (termino en 88 ciclos)
+OK    v1[0] = 0x0000000a (vlse32.v paso=8: v1[0]=mem[0])
+OK    v1[1] = 0x0000001e (vlse32.v paso=8: v1[1]=mem[8], SALTEA una palabra)
+OK    v1[2] = 0x00000032 (vlse32.v paso=8)
+OK    v1[3] = 0x00000046 (vlse32.v paso=8)
+OK    v2[0] = 0x0000000a (vsse32.v: releido contiguo, v2[0])
+OK    v2[1] = 0x00000000 (vsse32.v: el hueco del paso quedo SIN escribir)
+OK    v2[2] = 0x0000001e (vsse32.v: v2[2] es el segundo elemento guardado)
+OK    v2[3] = 0x00000000 (vsse32.v: segundo hueco intacto)
+OK    v3[0] = 0x00000028 (vluxei32.v offsets {12,8,4,0}: invierte el vector)
+OK    v3[1] = 0x0000001e (vluxei32.v)
+OK    v3[2] = 0x00000014 (vluxei32.v)
+OK    v3[3] = 0x0000000a (vluxei32.v)
+OK    v5[0] = 0x00000046 (vsuxei32.v: scatter, v1[3]=70 fue al offset 0)
+OK    v5[1] = 0x00000032 (vsuxei32.v scatter)
+OK    v5[2] = 0x0000001e (vsuxei32.v scatter)
+OK    v5[3] = 0x0000000a (vsuxei32.v scatter)
+OK    v6[0] = 0x00000001 (vlseg2e32.v: campo 0 -> v6 (los 'x' de los pares))
+OK    v6[1] = 0x00000002 (vlseg2e32.v campo 0)
+OK    v6[3] = 0x00000004 (vlseg2e32.v campo 0)
+OK    v7[0] = 0x00000064 (vlseg2e32.v: campo 1 -> v7 (los 'y'), DESINTERCALADO)
+OK    v7[1] = 0x000000c8 (vlseg2e32.v campo 1)
+OK    v7[3] = 0x00000190 (vlseg2e32.v campo 1)
+OK    v8[0] = 0x0000000a (vl1r.v con vl=0: copia el registro COMPLETO igual)
+OK    v8[3] = 0x00000046 (vl1r.v ignora vl (el elemento 3 tambien se copio))
+OK    v12[0] = 0x0000000a (vlm.v: carga la mascara como bytes)
+OK    v13[0] = 0x0000000a (vsm.v: y la vuelve a guardar identica)
+OK    v14[0] = 0x0000aaaa (vle32ff.v: el elemento 0 SI se cargo)
+OK    v14[1] = 0x0000bbbb (vle32ff.v: el elemento 1 tambien)
+OK    v16[0] = 0x00000002 (vle32ff.v RECORTO vl a 2 en vez de atrapar)
+OK    v20[0] = 0x00000000 (vle64.v (EEW=64, fuera de Zve32x) atrapo: v20 sin escribir)
+
+===============================================================
+  A4. RVV Fase 4d (widening/narrowing) + Fase 6 (vstart)
+===============================================================
+      (termino en 60 ciclos)
+OK    0x00000065 (vwaddu.vv: 1+100 en 32b, elemento 0 del par)
+OK    0x00000194 (vwaddu.vv: 4+400)
+OK    0x000001f9 (vwaddu.vv: elemento 4 YA ESTA EN v7 (EMUL=2))
+OK    0x00000328 (vwaddu.vv: ultimo elemento, en v7)
+OK    0x00003200 (vwmacc: v8 = 8*800 (vwmulu) + 8*800 (vwmacc))
+OK    0x00010000 (vwaddu.vx: el escalar se toma de 16b SIN signo)
+OK    0x00000000 (vwadd.vx: el MISMO escalar, CON signo, es -1 -> 1-1=0)
+OK    0x00001234 (vnsrl.wi 4: 0x00012345 >> 4, truncado a 16b)
+OK    0x00007fff (vnsrl.wi 4: 0x0007FFFF >> 4 = 0x7FFF)
+OK    0x0000ffff (vnclipu.wi 0: 0x12345 NO cabe en 16b -> SATURA)
+OK    0x0000f000 (vnsra.wi 4: 0xFFFF0000 con signo)
+OK    0x00000001 (vstart=3: el elemento 0 quedo SIN TOCAR (centinela v2))
+OK    0x00000003 (vstart=3: el elemento 2 tampoco se toco)
+OK    0x00000194 (vstart=3: el elemento 3 SI se calculo)
+OK    0x00000328 (vstart=3: y del 3 en adelante tambien)
+OK    0x00000065 (vstart volvio a 0: el siguiente vadd escribe TODO)
+OK    0x00000000 (csrr vstart = 0 tras completar la vectorial)
+
+===============================================================
+  E. Predictor TAGE: lazo + branch alternante
+===============================================================
+      (241 ciclos; 64 branches, 6 mispredicts -> 90.6% acierto)
+OK    el lazo ejecuto sus 32 iteraciones BAJO especulacion
+OK    el camino alternante tomo exactamente los 16 pares
+OK    64 branches condicionales retirados (32+32)
+OK    TAGE aprendio: mispredicts <= 16 de 64 (bimodal: ~32)
+
+===============================================================
+  B. Excepciones precisas y reanudables (ELF real)
+===============================================================
+      (termino en 36 ciclos)
+OK    mem[0x80] = 0x1 (out[0]=1 escrito ANTES del ECALL)
+OK    mem[0x90] = 0xbeef (el handler instalado en mtvec REALMENTE corrio)
+OK    mem[0x94] = 0xb (mcause=11 (environment call from M-mode), por la spec)
+OK    mem[0x84] = 0x2 (out[1]=2 DESPUES del MRET -> excepcion REANUDABLE)
+
+===============================================================
+  C. UART + interrupcion de timer + modos M/U
+===============================================================
+      salida del programa por el UART: >>> RV32
+ <<<
+      (termino en 513 ciclos)
+OK    mem[0x400] = 0x1 (el programa avanzo tras imprimir por el UART)
+OK    mem[0x404] = 0x11 (el handler atendio la INTERRUPCION de timer y volvio con MRET)
+OK    mem[0x408] = 0x8 (ECALL desde U-mode reporta causa 8 (no 11): privilegios funcionan)
+
+===============================================================
+  D. printf de la biblioteca C real (newlib)
+===============================================================
+      salida del programa por el UART:
+>>> Hola desde RV32IMFC+RVV+OOO
+suma(1..10) = 55
+hex=ff  char=A  str=ok
+<<<
+      (termino en 5292 ciclos)
+OK    printf de newlib se ejecuto completo sobre el core
+
+===============================================================
+  Todos los checks pasaron.
+===============================================================
+=== [HLS] testbench legible (mnemónicos) ===
+Testbench simple del SoC — prueba cada función por separado
+
+── Enteros (I) ──────────────────────────────
+  OK    add   5 + 10                       = 15
+  OK    sub   10 - 3                       = 7
+  OK    and   0b1100 & 0b1010              = 8
+  OK    or    0b1100 | 0b1010              = 14
+  OK    slli  1 << 4                       = 16
+  OK    slt   3 < 7                        = 1
+  OK    lui   0x12345                      = 305418240
+
+── Mul / Div (M) ──────────────────────────────
+  OK    mul   6 * 7                        = 42
+  OK    div   100 / 7                      = 14
+  OK    rem   100 % 7                      = 2
+  OK    div   5 / 0  (= -1, por el ISA)    = 4294967295
+
+── Memoria (load / store) ──────────────────────────────
+  OK    sw + lw   guarda 42 y lo relee     = 42
+  OK    sb + lbu  guarda un byte           = 171
+
+── Saltos (branch / jal) ──────────────────────────────
+  OK    beq   tomado salta el 99           = 1
+  OK    beq   NO tomado (5≠3)            = 8
+  OK    jal   salta el 88                  = 1
+
+── Punto flotante (F) ──────────────────────────────
+  OK    fadd  3.0 + 4.0                    = 7
+  OK    fmul  3.0 * 4.0                    = 12
+  OK    fdiv  12.0 / 4.0                   = 3
+  OK    feq   5.0 == 5.0                   = 1
+
+── Comprimidas (C) ──────────────────────────────
+  OK    c.li  x15 = 9  (instr. de 16 bits) = 9
+  OK    c.addi  9 + 3  (dos comprimidas)   = 12
+
+── Vectorial (RVV) ──────────────────────────────
+  OK    vadd.vv v3[0] = 10+1               = 11
+  OK    vadd.vv v3[3] = 40+4               = 44
+  OK    vmul.vx v4[0] = 10*3               = 30
+  OK    vmul.vx v4[2] = 30*3               = 90
+  OK    vse32   v1[0] -> mem[64]           = 10
+
+================================================
+  Todas las funciones pasaron.
+================================================
+=== [HLS] AXPY (IPC / speedup) ===
+OK    escalar  : 1024 elementos verificados (y[i] = 3*i + 7)
+OK    vectorial: 1024 elementos verificados (y[i] = 3*i + 7)
+version         ciclos    commits      IPC  ciclos/elem
+escalar          12297       9220    0.750        12.01
+vectorial         7430       2820    0.380         7.26
+speedup vectorial en ciclos: 1.66x  (12297 -> 7430)

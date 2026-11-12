@@ -1,0 +1,33 @@
+INFO: [SIM 2] *************** CSIM start ***************
+INFO: [SIM 4] CSIM will launch CLANG as the compiler.
+   Compiling ../../../../mixed_mul_fpu_vrat_32_tb.cpp in debug mode
+   Compiling ../../../../soc_top.cpp in debug mode
+   Generating csim.exe
+
+============================================================
+ ORIGINAL - MIXED MUL + FPU + VRAT
+============================================================
+
+============================================================
+ MIXED MUL + FPU + VRAT BENCHMARK
+============================================================
+ blocks                 : 32
+ MUL ops                : 128
+ FPU ops                : 128
+ vector arith ops       : 128
+ specialized ops        : 384
+ ticks                  : 983
+ dispatches             : 396
+ commits                : 396
+ MUL completions        : 128
+ FPU completions        : 128
+ vector completions     : 130
+ vector arith completed : 128
+ IPC                    : 0.402848
+ specialized ops/tick   : 0.390641
+ correctness            : PASS
+============================================================
+
+MIXED_RETURN = 0
+INFO: [SIM 1] CSim done with 0 errors.
+INFO: [SIM 3] *************** CSIM finish ***************

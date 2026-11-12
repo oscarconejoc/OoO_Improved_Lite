@@ -1,0 +1,276 @@
+=== [TLM] batería de verificación ===
+
+===============================================================
+  A. ISA (I+M+F+C) + RVV Fases 1-3
+===============================================================
+      (81 dispatches, 77 commits en 179 ciclos)
+OK    x1  = 0x00000005 (addi)
+OK    x2  = 0x0000000a (addi)
+OK    x3  = 0x00000032 (mul)
+OK    x4  = 0x00000007 (addi independiente del mul)
+OK    x5  = 0x00000039 (add dependiente del mul (RAW via CDB))
+OK    x6  = 0x00000039 (lw round-trip del sw)
+OK    x7  = 0x00000001 (beq tomado (99 nunca ejecuto))
+OK    x8  = 0x0000002c (link del jal)
+OK    x9  = 0x00000000 (instruccion saltada por jal)
+OK    x10 = 0x12345000 (lui)
+OK    x11 = 0x0000000a (div)
+OK    x12 = 0x00000005 (sub independiente del div)
+OK    x15 = 0x0000000c (C.LI + C.ADDI comprimidas)
+OK    x16 = 0x00000015 (addi de 32 bits en pc%4==2 (straddle))
+OK    x20 = 0x00000003 (addi (fuente de fcvt))
+OK    x21 = 0x00000004 (addi (fuente de fcvt))
+OK    x22 = 0x00000001 (feq.s f5==f6 (FP escribe banco entero))
+OK    x23 = 0x41400000 (fmv.x.w bits de 12.0f)
+OK    x24 = 0x00000002 (addi independiente del fdiv)
+OK    x13 = 0x00000200 (addi (base del primer vle32.v))
+OK    x14 = 0x00000210 (addi (base del segundo vle32.v))
+OK    x25 = 0x00000063 (addi independiente de vadd.vv)
+OK    x26 = 0x0000004d (addi independiente de vmul.vv)
+OK    x17 = 0x00000220 (addi (direccion del vse32.v))
+OK    x19 = 0x00000004 (vsetvli x19,x0 -> vl=VLMAX=4 (rs1=x0 pide el maximo))
+OK    x27 = 0x00000002 (addi (AVL para el segundo vsetvli))
+OK    x28 = 0x00000002 (vsetvli x28,x27 -> vl=min(AVL=2,VLMAX=4)=2 (largo dinamico))
+OK    x18 = 0x00000004 (vsetvli e32 al inicio de Fase 3 -> vl=VLMAX=4)
+OK    x29 = 0x00000003 (vcpop.m  sobre mascara 0b1110 -> 3 bits en 1)
+OK    x30 = 0x00000001 (vfirst.m sobre mascara 0b1110 -> primer bit en indice 1)
+OK    f1  = 0x40400000 (fcvt.s.w 3 -> 3.0)
+OK    f2  = 0x40800000 (fcvt.s.w 4 -> 4.0)
+OK    f3  = 0x41400000 (fmul.s 3*4 = 12.0)
+OK    f5  = 0x41c00000 (fmadd.s 3*4+12 = 24.0 (rs3))
+OK    f6  = 0x41c00000 (flw round-trip del fsw)
+OK    f7  = 0x40800000 (fdiv.s 12/3 = 4.0)
+OK    OOO: addi(pc12) antes que mul(pc8) (ciclos 6 < 7)
+OK    OOO: sub(pc56) antes que div(pc52) (ciclos 21 < 27)
+OK    OOO: addi(pc104) antes que fdiv(pc100) -- OOO cruzando bancos (ciclos 47 < 53)
+OK    OOO: addi(pc140) antes que vadd.vv(pc136) -- coprocesamiento (ciclos 59 < 72)
+OK    OOO: addi(pc148) antes que vmul.vv(pc144) -- coprocesamiento (ciclos 61 < 76)
+OK    v1[0] = 0x0000000a
+OK    v1[1] = 0x00000014
+OK    v1[2] = 0x0000001e
+OK    v1[3] = 0x00000028
+OK    v2[0] = 0x00000001
+OK    v2[1] = 0x00000002
+OK    v2[2] = 0x00000003
+OK    v2[3] = 0x00000004
+OK    v3[0] = 0x0000000b
+OK    v3[1] = 0x00000016
+OK    v3[2] = 0x00000021
+OK    v3[3] = 0x0000002c
+OK    v4[0] = 0x00000064
+OK    v4[1] = 0x00000190
+OK    v4[2] = 0x00000384
+OK    v4[3] = 0x00000640
+OK    v5[0] = 0x0000000b
+OK    v5[1] = 0x00000016
+OK    v5[2] = 0x0000001e
+OK    v5[3] = 0x00000028
+OK    v6[0] = 0x00000000
+OK    v6[1] = 0x00000000
+OK    v6[2] = 0x00000002
+OK    v6[3] = 0x00000000
+OK    v7[0] = 0x0000000b
+OK    v7[1] = 0x00000016
+OK    v7[2] = 0x0000001f
+OK    v7[3] = 0x0000002c
+OK    v8[0] = 0x0000000a
+OK    v8[1] = 0x00000014
+OK    v8[2] = 0x0000001e
+OK    v8[3] = 0x00000028
+OK    v9[0] = 0x00000400
+OK    v9[1] = 0x00200000
+OK    v9[2] = 0xc0000000
+OK    v9[3] = 0x00000400
+OK    v10[0] = 0x0000000a
+OK    v10[1] = 0x0000000a
+OK    v10[2] = 0x0000000a
+OK    v10[3] = 0x0000000a
+OK    v11[0] = 0x0000000d
+OK    v11[1] = 0x00000017
+OK    v11[2] = 0x00000021
+OK    v11[3] = 0x0000002b
+OK    v12[0] = 0x0000006e
+OK    v12[1] = 0x00000078
+OK    v12[2] = 0x00000082
+OK    v12[3] = 0x0000008c
+OK    v13[0] = 0xfffffff6
+OK    v13[1] = 0xffffffec
+OK    v13[2] = 0xffffffe2
+OK    v13[3] = 0xffffffd8
+OK    v14[0] = 0x0000000b
+OK    v14[1] = 0x00000014
+OK    v14[2] = 0x00000021
+OK    v14[3] = 0x00000028
+OK    v15[0] = 0x0000000a
+OK    v15[1] = 0x00000014
+OK    v15[2] = 0x0000001e
+OK    v15[3] = 0x00000028
+OK    v16[0] = 0x0101010b
+OK    v16[1] = 0x01010115
+OK    v16[2] = 0x0101011f
+OK    v16[3] = 0x01010129
+OK    v17[0] = 0x0000000a
+OK    v17[1] = 0x00000014
+OK    v17[2] = 0x0000001e
+OK    v17[3] = 0x00000028
+OK    v18[0] = 0x0002000c
+OK    v18[1] = 0x00020016
+OK    v18[2] = 0x00020020
+OK    v18[3] = 0x0002002a
+OK    v19[0] = 0x0000000f
+OK    v20[0] = 0x00000000
+OK    v21[0] = 0x0000000e
+OK    v22[0] = 0x0000000e
+OK    v23[0] = 0x0000000e
+OK    v24[0] = 0x0000000a
+OK    v24[1] = 0x00000002
+OK    v24[2] = 0x0000001e
+OK    v24[3] = 0x00000004
+OK    v25[0] = 0x0000000a
+OK    v25[1] = 0x00000014
+OK    v25[2] = 0x0000001e
+OK    v25[3] = 0x00000028
+OK    v26[0] = 0x00000000
+OK    v26[1] = 0x00000001
+OK    v26[2] = 0x00000002
+OK    v26[3] = 0x00000003
+OK    v27[0] = 0x00000000
+OK    v27[1] = 0x00000000
+OK    v27[2] = 0x00000001
+OK    v27[3] = 0x00000002
+OK    mem[1024] = 57 (sw escribio al commit)
+OK    mem[1028] = 0x41C00000 (fsw escribio 24.0f al commit)
+OK    mem[544..559] = {11,22,33,44} (vse32.v round-trip, resuelto en cabeza del ROB)
+
+===============================================================
+  A2. RVV Fase 4: reducciones, permutaciones y punto fijo
+===============================================================
+      (22 dispatches en 47 ciclos)
+OK    v6[0] = 0x00000065 (vredsum.vs: v2[0]=1 + sum(v1)=100)
+OK    v7[0] = 0x00000028 (vredmax.vs: max(1, 10,20,30,40))
+OK    v8[0] = 0x00000000 (vredand.vs: 10 & 10&20&30&40)
+OK    v9[0] = 0x00000001 (vslideup.vi: el elemento 0 queda SIN TOCAR)
+OK    v9[1] = 0x0000000a (vslideup.vi: v9[1] = v1[0])
+OK    v9[2] = 0x00000014 (vslideup.vi: v9[2] = v1[1])
+OK    v9[3] = 0x0000001e (vslideup.vi: v9[3] = v1[2])
+OK    v10[0] = 0x00000014 (vslidedown.vi: v10[0] = v1[1])
+OK    v10[1] = 0x0000001e (vslidedown.vi)
+OK    v10[2] = 0x00000028 (vslidedown.vi)
+OK    v10[3] = 0x00000000 (vslidedown.vi: mas alla del vector -> 0)
+OK    v11[0] = 0x0000001e (vrgather.vi: todos toman v1[2])
+OK    v11[3] = 0x0000001e (vrgather.vi)
+OK    v12[0] = 0x0000000a (vcompress.vm: empaqueta v1[0] (mascara 0b0101))
+OK    v12[1] = 0x0000001e (vcompress.vm: y v1[2], CONSECUTIVOS)
+OK    v13[0] = 0xffffffff (vsaddu.vx: 10+0xFFFFFFFF SATURA al maximo)
+OK    v13[3] = 0xffffffff (vsaddu.vx satura)
+OK    v14[0] = 0x00000000 (vssubu.vx: 1-10 SATURA a 0 (no envuelve))
+OK    v14[3] = 0x00000000 (vssubu.vx satura)
+OK    v15[0] = 0x00000006 (vaadd.vv: (10+1)/2 con redondeo = 6)
+OK    v15[1] = 0x0000000b (vaadd.vv: (20+2)/2 = 11)
+OK    v15[2] = 0x00000011 (vaadd.vv: (30+3)/2 con redondeo = 17)
+OK    v15[3] = 0x00000016 (vaadd.vv: (40+4)/2 = 22)
+
+===============================================================
+  A3. RVV Fase 5: strided, indexado, segmentado, fof, reg. completo
+===============================================================
+      (36 dispatches en 89 ciclos)
+OK    v1[0] = 0x0000000a (vlse32.v paso=8: v1[0]=mem[0])
+OK    v1[1] = 0x0000001e (vlse32.v paso=8: v1[1]=mem[+8], SALTEA una palabra)
+OK    v1[2] = 0x00000032 (vlse32.v paso=8)
+OK    v1[3] = 0x00000046 (vlse32.v paso=8)
+OK    v2[0] = 0x0000000a (vsse32.v: releido contiguo, v2[0])
+OK    v2[1] = 0x00000000 (vsse32.v: el hueco del paso quedo SIN escribir)
+OK    v2[2] = 0x0000001e (vsse32.v: v2[2] es el segundo elemento guardado)
+OK    v2[3] = 0x00000000 (vsse32.v: segundo hueco intacto)
+OK    v3[0] = 0x00000028 (vluxei32.v offsets {12,8,4,0}: invierte el vector)
+OK    v3[1] = 0x0000001e (vluxei32.v)
+OK    v3[2] = 0x00000014 (vluxei32.v)
+OK    v3[3] = 0x0000000a (vluxei32.v)
+OK    v5[0] = 0x00000046 (vsuxei32.v: scatter, v1[3]=70 fue al offset 0)
+OK    v5[1] = 0x00000032 (vsuxei32.v scatter)
+OK    v5[2] = 0x0000001e (vsuxei32.v scatter)
+OK    v5[3] = 0x0000000a (vsuxei32.v scatter)
+OK    v6[0] = 0x00000001 (vlseg2e32.v: campo 0 -> v6 (los 'x' de los pares))
+OK    v6[1] = 0x00000002 (vlseg2e32.v campo 0)
+OK    v6[3] = 0x00000004 (vlseg2e32.v campo 0)
+OK    v7[0] = 0x00000064 (vlseg2e32.v: campo 1 -> v7 (los 'y'), DESINTERCALADO)
+OK    v7[1] = 0x000000c8 (vlseg2e32.v campo 1)
+OK    v7[3] = 0x00000190 (vlseg2e32.v campo 1)
+OK    v8[0] = 0x0000000a (vl1r.v con vl=0: copia el registro COMPLETO igual)
+OK    v8[3] = 0x00000046 (vl1r.v ignora vl (el elemento 3 tambien se copio))
+OK    v12[0] = 0x0000000a (vlm.v: carga la mascara como bytes)
+OK    v13[0] = 0x0000000a (vsm.v: y la vuelve a guardar identica)
+OK    v14[0] = 0x0000aaaa (vle32ff.v: el elemento 0 SI se cargo)
+OK    v14[1] = 0x0000bbbb (vle32ff.v: el elemento 1 tambien)
+OK    v16[0] = 0x00000002 (vle32ff.v RECORTO vl a 2 en vez de atrapar)
+OK    v20[0] = 0x00000000 (vle64.v (EEW=64, fuera de Zve32x) atrapo: v20 sin escribir)
+
+===============================================================
+  A4. RVV Fase 4d (widening/narrowing) + Fase 6 (vstart)
+===============================================================
+      (25 dispatches en 62 ciclos)
+OK    0x00000065 (vwaddu.vv: 1+100 en 32b, elemento 0 del par)
+OK    0x00000194 (vwaddu.vv: 4+400)
+OK    0x000001f9 (vwaddu.vv: el elemento 4 YA ESTA EN v7 (EMUL=2))
+OK    0x00000328 (vwaddu.vv: ultimo elemento, en v7)
+OK    0x00003200 (vwmacc: 8*800 (vwmulu) + 8*800 (vwmacc))
+OK    0x00010000 (vwaddu.vx: el escalar se toma de 16b SIN signo)
+OK    0x00000000 (vwadd.vx: el MISMO escalar CON signo es -1 -> 1-1=0)
+OK    0x00001234 (vnsrl.wi 4: 0x00012345 >> 4, truncado a 16b)
+OK    0x00007fff (vnsrl.wi 4: 0x0007FFFF >> 4 = 0x7FFF)
+OK    0x0000ffff (vnclipu.wi 0: 0x12345 NO cabe en 16b -> SATURA)
+OK    0x0000f000 (vnsra.wi 4: 0xFFFF0000 con signo)
+OK    0x00000001 (vstart=3: el elemento 0 quedo SIN TOCAR (centinela v2))
+OK    0x00000003 (vstart=3: el elemento 2 tampoco se toco)
+OK    0x00000194 (vstart=3: el elemento 3 SI se calculo)
+OK    0x00000328 (vstart=3: y del 3 en adelante tambien)
+OK    0x00000065 (vstart volvio a 0: el siguiente vadd escribe TODO)
+OK    0x00000000 (csrr vstart = 0 tras completar la vectorial)
+
+===============================================================
+  E. Predictor TAGE: lazo + branch alternante
+===============================================================
+      (241 ciclos; 64 branches, 6 mispredicts -> 90.6% acierto)
+OK    el lazo ejecuto sus 32 iteraciones BAJO especulacion
+OK    el camino alternante tomo exactamente los 16 pares
+OK    64 branches condicionales retirados (32+32)
+OK    TAGE aprendio: mispredicts <= 16 de 64 (bimodal: ~32)
+
+===============================================================
+  B. Excepciones precisas y reanudables (ELF real)
+===============================================================
+      (termino en 36 ciclos)
+OK    mem[0x80] = 0x1 (out[0]=1 escrito ANTES del ECALL)
+OK    mem[0x90] = 0xbeef (el handler instalado en mtvec REALMENTE corrio)
+OK    mem[0x94] = 0xb (mcause=11 (environment call from M-mode), por la spec)
+OK    mem[0x84] = 0x2 (out[1]=2 DESPUES del MRET -> excepcion REANUDABLE)
+
+===============================================================
+  C. UART + interrupcion de timer + modos M/U
+===============================================================
+      salida del programa por el UART (periferico TLM): >>> RV32
+      (termino en 514 ciclos)
+ <<<
+OK    mem[0x400] = 0x1 (el programa avanzo tras imprimir por el UART)
+OK    mem[0x404] = 0x11 (el handler atendio la INTERRUPCION de timer y volvio con MRET)
+OK    mem[0x408] = 0x8 (ECALL desde U-mode reporta causa 8 (no 11): privilegios funcionan)
+
+===============================================================
+  D. printf de la biblioteca C real (newlib)
+===============================================================
+      salida del programa por el UART (periferico TLM):
+>>> Hola desde RV32IMFC+RVV+OOO
+suma(1..10) = 55
+hex=ff  char=A  str=ok
+      (termino en 5292 ciclos)
+<<<
+OK    printf de newlib se ejecuto completo sobre el core
+
+===============================================================
+  Todos los checks pasaron.
+===============================================================
+
+Info: /OSCI/SystemC: Simulation stopped by user.
+=== [TLM] AXPY (IPC / speedup) ===
+version         ciclos    commits      IPC  ciclos/elem
+speedup vectorial en ciclos: 1.66x  (12297 -> 7430)

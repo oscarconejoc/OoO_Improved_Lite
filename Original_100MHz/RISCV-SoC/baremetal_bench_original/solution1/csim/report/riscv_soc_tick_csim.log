@@ -1,0 +1,24 @@
+INFO: [SIM 2] *************** CSIM start ***************
+INFO: [SIM 4] CSIM will launch CLANG as the compiler.
+   Compiling ../../../../baremetal_benchmark_tb.cpp in debug mode
+   Compiling ../../../../soc_top.cpp in debug mode
+   Generating csim.exe
+
+============================================================
+ ORIGINAL - BARE-METAL AXPY + GEMM
+============================================================
+
+ ELF SHA256 : 237180AFF02E3D07EAF428FD13D5DAE8F6C684632D8D0ADCE6B7C33EE30C1B0C
+
+ halted     : YES
+ cycles     : 82452
+ commits    : 44367
+ IPC        : 0.538095
+ AXPY       : PASS
+ GEMM       : PASS
+ ALL        : PASS
+ GEMM tests : 3
+ signature  : 0xDEADBEEF
+============================================================
+INFO: [SIM 1] CSim done with 0 errors.
+INFO: [SIM 3] *************** CSIM finish ***************

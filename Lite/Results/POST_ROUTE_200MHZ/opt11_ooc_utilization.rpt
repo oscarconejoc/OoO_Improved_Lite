@@ -1,0 +1,46 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2024.1 (win64) Build 5076996 Wed May 22 18:37:14 MDT 2024
+| Date         : Fri Sep 11 16:50:35 2026
+| Host         : DESKTOP-KK0ICS3 running 64-bit major release  (build 9200)
+| Command      : report_utilization -hierarchical -file C:/Users/Oscar/Desktop/TFG/TFG/Lite/RISCV-SoC/LITE_OPT11_INLINE_EXPAND/POST_ROUTE_200MHZ/opt11_ooc_utilization.rpt
+| Design       : riscv_soc_tick
+| Device       : xck26-sfvc784-2LV-c
+| Speed File   : -2LV
+| Design State : Routed
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++------------------------------------------------------+------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------+------------+
+|                       Instance                       |                     Module                     | Total LUTs | Logic LUTs | LUTRAMs | SRLs |  FFs  | RAMB36 | RAMB18 | URAM | DSP Blocks |
++------------------------------------------------------+------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------+------------+
+| riscv_soc_tick                                       |                                          (top) |      14272 |      14256 |       0 |   16 | 13703 |      0 |      0 |    0 |          8 |
+|   (riscv_soc_tick)                                   |                                          (top) |      10060 |      10048 |       0 |   12 | 12958 |      0 |      0 |    0 |          5 |
+|   control_s_axi_U                                    |                   riscv_soc_tick_control_s_axi |       3253 |       3253 |       0 |    0 |    25 |      0 |      0 |    0 |          0 |
+|   mul_32ns_32ns_64_1_1_U54                           |            riscv_soc_tick_mul_32ns_32ns_64_1_1 |         66 |         66 |       0 |    0 |     0 |      0 |      0 |    0 |          2 |
+|   mul_32ns_32s_64_1_1_U55                            |             riscv_soc_tick_mul_32ns_32s_64_1_1 |         66 |         66 |       0 |    0 |     0 |      0 |      0 |    0 |          0 |
+|   mul_32s_32s_64_1_1_U57                             |              riscv_soc_tick_mul_32s_32s_64_1_1 |        102 |        102 |       0 |    0 |     0 |      0 |      0 |    0 |          1 |
+|   sdiv_32s_32s_32_36_seq_1_U90                       |        riscv_soc_tick_sdiv_32s_32s_32_36_seq_1 |        172 |        171 |       0 |    1 |   165 |      0 |      0 |    0 |          0 |
+|     (sdiv_32s_32s_32_36_seq_1_U90)                   |        riscv_soc_tick_sdiv_32s_32s_32_36_seq_1 |         58 |         58 |       0 |    0 |    34 |      0 |      0 |    0 |          0 |
+|     riscv_soc_tick_sdiv_32s_32s_32_36_seq_1_divseq_u | riscv_soc_tick_sdiv_32s_32s_32_36_seq_1_divseq |        114 |        113 |       0 |    1 |   131 |      0 |      0 |    0 |          0 |
+|   srem_32s_32s_32_36_seq_1_U88                       |        riscv_soc_tick_srem_32s_32s_32_36_seq_1 |        153 |        152 |       0 |    1 |   166 |      0 |      0 |    0 |          0 |
+|     (srem_32s_32s_32_36_seq_1_U88)                   |        riscv_soc_tick_srem_32s_32s_32_36_seq_1 |         38 |         38 |       0 |    0 |    34 |      0 |      0 |    0 |          0 |
+|     riscv_soc_tick_srem_32s_32s_32_36_seq_1_divseq_u | riscv_soc_tick_srem_32s_32s_32_36_seq_1_divseq |        115 |        114 |       0 |    1 |   132 |      0 |      0 |    0 |          0 |
+|   udiv_32s_32s_32_36_seq_1_U89                       |        riscv_soc_tick_udiv_32s_32s_32_36_seq_1 |        246 |        245 |       0 |    1 |   201 |      0 |      0 |    0 |          0 |
+|     (udiv_32s_32s_32_36_seq_1_U89)                   |        riscv_soc_tick_udiv_32s_32s_32_36_seq_1 |        165 |        165 |       0 |    0 |    71 |      0 |      0 |    0 |          0 |
+|     riscv_soc_tick_udiv_32s_32s_32_36_seq_1_divseq_u | riscv_soc_tick_udiv_32s_32s_32_36_seq_1_divseq |         81 |         80 |       0 |    1 |   130 |      0 |      0 |    0 |          0 |
+|   urem_32s_32s_32_36_seq_1_U91                       |        riscv_soc_tick_urem_32s_32s_32_36_seq_1 |        201 |        200 |       0 |    1 |   188 |      0 |      0 |    0 |          0 |
+|     (urem_32s_32s_32_36_seq_1_U91)                   |        riscv_soc_tick_urem_32s_32s_32_36_seq_1 |        119 |        119 |       0 |    0 |    57 |      0 |      0 |    0 |          0 |
+|     riscv_soc_tick_urem_32s_32s_32_36_seq_1_divseq_u | riscv_soc_tick_urem_32s_32s_32_36_seq_1_divseq |         82 |         81 |       0 |    1 |   131 |      0 |      0 |    0 |          0 |
++------------------------------------------------------+------------------------------------------------+------------+------------+---------+------+-------+--------+--------+------+------------+
+* Note: The sum of lower-level cells may be larger than their parent cells total, due to cross-hierarchy LUT combining
+
+

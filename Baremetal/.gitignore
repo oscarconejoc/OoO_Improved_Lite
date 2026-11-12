@@ -1,0 +1,11 @@
+TECHNICAL_GUIDE.md
+build/
+gem5/out/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.venv/
+.vscode/
+*.o

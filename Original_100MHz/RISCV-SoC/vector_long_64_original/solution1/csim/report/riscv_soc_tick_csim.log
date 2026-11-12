@@ -1,0 +1,25 @@
+INFO: [SIM 2] *************** CSIM start ***************
+INFO: [SIM 4] CSIM will launch CLANG as the compiler.
+   Compiling ../../../../vector_long_64pairs_tb.cpp in debug mode
+   Compiling ../../../../soc_top.cpp in debug mode
+   Generating csim.exe
+
+ORIGINAL - VECTOR LONG 64 PAIRS
+
+============================================================
+ VECTOR LONG - 64 VMUL+VADD PAIRS
+============================================================
+ pairs              : 64
+ vector arith ops   : 128
+ ticks              : 398
+ dispatches         : 132
+ commits            : 132
+ vec completions    : 130
+ IPC                : 0.331658
+ arith ops/tick     : 0.321608
+ vec complete/tick  : 0.326633
+ correctness        : PASS
+============================================================
+VECTOR_LONG_RETURN = 0
+INFO: [SIM 1] CSim done with 0 errors.
+INFO: [SIM 3] *************** CSIM finish ***************

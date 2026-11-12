@@ -1,0 +1,18 @@
+INFO: [SIM 2] *************** CSIM start ***************
+INFO: [SIM 4] CSIM will launch CLANG as the compiler.
+   Compiling ../../../../vector_vrat_benchmark_tb.cpp in debug mode
+   Compiling ../../../../soc_top.cpp in debug mode
+   Generating csim.exe
+
+============================================================
+ ORIGINAL - VECTOR VRAT MICROBENCHMARK
+============================================================
+VRAT directed: ciclos=30, completions_vec=8
+VRAT overlap: VMUL dispatch=14 complete=27 | VADD dispatch=18 complete=29
+PASS  overlap: VADD fue despachada antes de completar VMUL
+FAIL  VADD no termino antes que VMUL
+
+VECTOR_SUITE_RETURN = 1
+============================================================
+INFO: [SIM 1] CSim done with 0 errors.
+INFO: [SIM 3] *************** CSIM finish ***************

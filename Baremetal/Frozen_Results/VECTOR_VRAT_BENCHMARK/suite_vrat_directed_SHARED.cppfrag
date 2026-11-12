@@ -1,0 +1,268 @@
+static int suite_vrat_directed() {
+    ap_uint<32> imem[OOO_IMEM_WORDS] = {0};
+    ap_uint<32> dmem[OOO_DMEM_WORDS] = {0};
+
+    // v1 = {1,2,3,4}
+    dmem[0] = 1; dmem[1] = 2; dmem[2] = 3; dmem[3] = 4;
+
+    // v2 = {10,20,30,40}
+    dmem[4] = 10; dmem[5] = 20; dmem[6] = 30; dmem[7] = 40;
+
+    const uint32_t F6_ADD = 0b000000;
+    const uint32_t F6_MUL = 0b100101;
+
+    std::vector<uint16_t> prog;
+
+    auto push32 = [&](uint32_t w) {
+        prog.push_back(w & 0xFFFF);
+        prog.push_back(w >> 16);
+    };
+
+    auto push16 = [&](uint16_t h) {
+        prog.push_back(h);
+    };
+
+    // vl = 4, e32,m1
+    push32(enc_vsetvli(1, 0, VTYPE_E32_M1));
+
+    // Cargar operandos.
+    push32(enc_vec_mem(rv32i::Opcode::LOAD_FP, 1, 0));
+
+    push32(i_type(
+        rv32i::Opcode::OP_IMM,
+        2,
+        F3A::ADD_SUB,
+        0,
+        16
+    ));
+
+    push32(enc_vec_mem(rv32i::Opcode::LOAD_FP, 2, 2));
+
+    // ------------------------------------------------------------
+    // RAW
+    // v3 = v1 * v2
+    // v4 = v3 + v2
+    // v4 DEBE consumir el resultado renombrado de v3.
+    // ------------------------------------------------------------
+    push32(enc_op_v(F6_MUL, 1, 2, rvv_f3_opmvv, 3));
+    push32(enc_op_v(F6_ADD, 3, 2, rvv_f3_opivv, 4));
+
+    // ------------------------------------------------------------
+    // WAW
+    // Dos productores consecutivos de v5.
+    // El segundo mapping debe sobrevivir al commit del primero.
+    // ------------------------------------------------------------
+    push32(enc_op_v(F6_ADD, 1, 2, rvv_f3_opivv, 5));
+    push32(enc_op_v(F6_ADD, 2, 2, rvv_f3_opivv, 5));
+
+    // ------------------------------------------------------------
+    // Dos instrucciones independientes.
+    // Todavia comparten vec_rs, asi que aqui solo validamos estado.
+    // ------------------------------------------------------------
+    push32(enc_op_v(F6_MUL, 1, 1, rvv_f3_opmvv, 6));
+    push32(enc_op_v(F6_ADD, 2, 2, rvv_f3_opivv, 7));
+
+    push16(0x0000);
+
+    for (size_t i = 0; i < prog.size(); i++) {
+        uint32_t w = imem[i / 2].to_uint();
+
+        if ((i & 1) == 0)
+            w = (w & 0xFFFF0000u) | prog[i];
+        else
+            w = (w & 0x0000FFFFu) |
+                (uint32_t(prog[i]) << 16);
+
+        imem[i / 2] = w;
+    }
+
+    ap_uint<1> dv;
+    ap_uint<3> dt;
+    ap_uint<32> dp;
+
+    ap_uint<1> a0d,a1d,mdd,fpd,lsd,brd,vcd;
+    ap_uint<3> a0t,a1t,mdt,fpt,lst,brt,vct;
+
+    ap_uint<1> cv,cfp;
+    ap_uint<5> crd;
+    ap_uint<32> cval;
+
+    static ap_uint<32> vo[OOO_VEC_REGFILE_LEN];
+    ap_uint<1> halted;
+
+    riscv_soc_tick(
+        1, imem, dmem,
+        dv,dt,dp,
+        a0d,a0t,a1d,a1t,
+        mdd,mdt,fpd,fpt,
+        lsd,lst,brd,brt,vcd,vct,
+        cv,cfp,crd,cval,
+        vo,halted
+    );
+
+    int cycles = 0;
+    int vec_completions = 0;
+
+    int indep_mul_dispatch = -1;
+    int indep_add_dispatch = -1;
+    int indep_mul_complete = -1;
+    int indep_add_complete = -1;
+
+    ap_uint<3> indep_mul_tag = 0;
+    ap_uint<3> indep_add_tag = 0;
+
+    bool indep_mul_seen = false;
+    bool indep_add_seen = false;
+
+    while (!halted && cycles < 500) {
+        cycles++;
+
+        riscv_soc_tick(
+            0, imem, dmem,
+            dv,dt,dp,
+            a0d,a0t,a1d,a1t,
+            mdd,mdt,fpd,fpt,
+            lsd,lst,brd,brt,vcd,vct,
+            cv,cfp,crd,cval,
+            vo,halted
+        );
+
+        // PC 32 = VMUL independiente.
+        if (dv && dp == 32) {
+            indep_mul_dispatch = cycles;
+            indep_mul_tag = dt;
+            indep_mul_seen = true;
+        }
+
+        // PC 36 = VADD independiente.
+        if (dv && dp == 36) {
+            indep_add_dispatch = cycles;
+            indep_add_tag = dt;
+            indep_add_seen = true;
+        }
+
+        if (vcd) {
+            vec_completions++;
+
+            if (indep_mul_seen &&
+                vct == indep_mul_tag &&
+                indep_mul_complete < 0) {
+                indep_mul_complete = cycles;
+            }
+
+            if (indep_add_seen &&
+                vct == indep_add_tag &&
+                indep_add_complete < 0) {
+                indep_add_complete = cycles;
+            }
+        }
+    }
+
+    int fails = 0;
+
+    auto ck = [&](int vr, int lane, uint32_t expected,
+                  const char* name) {
+        uint32_t got =
+            vo[vr * OOO_VEC_LANES + lane].to_uint();
+
+        if (got != expected) {
+            printf(
+                "FAIL  %s: v%d[%d]=%u esperado=%u\n",
+                name, vr, lane, got, expected
+            );
+            fails++;
+        }
+    };
+
+    // RAW: v3 = v1*v2
+    ck(3,0,10,  "RAW productor");
+    ck(3,1,40,  "RAW productor");
+    ck(3,2,90,  "RAW productor");
+    ck(3,3,160, "RAW productor");
+
+    // RAW consumidor: v4 = v3+v2
+    ck(4,0,20,  "RAW consumidor");
+    ck(4,1,60,  "RAW consumidor");
+    ck(4,2,120, "RAW consumidor");
+    ck(4,3,200, "RAW consumidor");
+
+    // WAW: debe quedar el segundo resultado.
+    ck(5,0,20, "WAW");
+    ck(5,1,40, "WAW");
+    ck(5,2,60, "WAW");
+    ck(5,3,80, "WAW");
+
+    // Independientes.
+    ck(6,0,1,  "independiente VMUL");
+    ck(6,1,4,  "independiente VMUL");
+    ck(6,2,9,  "independiente VMUL");
+    ck(6,3,16, "independiente VMUL");
+
+    ck(7,0,20, "independiente VADD");
+    ck(7,1,40, "independiente VADD");
+    ck(7,2,60, "independiente VADD");
+    ck(7,3,80, "independiente VADD");
+
+    printf(
+        "VRAT directed: ciclos=%d, completions_vec=%d\n",
+        cycles, vec_completions
+    );
+
+    if (!halted) {
+        printf("FAIL  VRAT directed no termino\n");
+        fails++;
+    }
+
+    printf(
+        "VRAT overlap: VMUL dispatch=%d complete=%d | "
+        "VADD dispatch=%d complete=%d\n",
+        indep_mul_dispatch,
+        indep_mul_complete,
+        indep_add_dispatch,
+        indep_add_complete
+    );
+
+    if (indep_mul_dispatch < 0 ||
+        indep_add_dispatch < 0 ||
+        indep_mul_complete < 0 ||
+        indep_add_complete < 0) {
+
+        printf("FAIL  no se observaron todos los eventos dual-slot\n");
+        fails++;
+
+    } else {
+
+        // La VADD joven fue despachada mientras la VMUL vieja
+        // todavia estaba en vuelo.
+        if (indep_add_dispatch < indep_mul_complete) {
+            printf(
+                "PASS  overlap: VADD fue despachada antes de "
+                "completar VMUL\n"
+            );
+        } else {
+            printf(
+                "FAIL  no hubo ventana de overlap VMUL/VADD\n"
+            );
+            fails++;
+        }
+
+        // Evidencia mas fuerte: la VADD joven termina antes que
+        // la VMUL vieja. Con el vec_rs unico esto era imposible.
+        if (indep_add_complete < indep_mul_complete) {
+            printf(
+                "PASS  completion OoO vectorial: "
+                "VADD joven termino antes que VMUL vieja\n"
+            );
+        } else {
+            printf(
+                "FAIL  VADD no termino antes que VMUL\n"
+            );
+            fails++;
+        }
+    }
+
+    if (fails == 0)
+        printf("PASS  VRAT RAW + WAW + independientes\n");
+
+    return fails;
+}

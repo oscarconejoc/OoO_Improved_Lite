@@ -1,0 +1,39 @@
+============================================================
+OPT11 INLINE EXPAND - RTL VALIDATED
+============================================================
+
+Cambio:
+  #pragma HLS INLINE en rv32c::expand()
+
+CSIM:
+  PASS
+
+CSYNTH:
+  Estimated Fmax = 252.27 MHz
+  Latency max    = 45
+  Interval max   = 46
+
+RTL @ 200 MHz:
+  PASS
+
+CONTROL:
+  Physical clocks = 30206
+  HIST_AVG         = 10.714
+
+OPT11:
+  Physical clocks = 27789
+  HIST_AVG         = 9.857
+
+IMPROVEMENT:
+  Saved clocks = 2417
+  Clock reduction ~= 8.00 %
+  Speedup ~= 1.087x
+
+HISTOGRAM:
+  8 clocks  : 1
+  9 clocks  : 401
+  10 clocks : 2417
+
+Conclusion:
+  Dominant dispatch tick reduced from 11 to 10 physical clocks.
+============================================================

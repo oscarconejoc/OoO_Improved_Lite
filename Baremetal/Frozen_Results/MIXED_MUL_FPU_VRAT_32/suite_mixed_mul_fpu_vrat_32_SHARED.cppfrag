@@ -1,0 +1,537 @@
+static int suite_mixed_mul_fpu_vrat_32() {
+    ap_uint<32> imem[OOO_IMEM_WORDS] = {0};
+    ap_uint<32> dmem[OOO_DMEM_WORDS] = {0};
+
+    // ============================================================
+    // DATOS VECTORIALES
+    // ============================================================
+
+    // v1 = {1,2,3,4}
+    dmem[0] = 1;
+    dmem[1] = 2;
+    dmem[2] = 3;
+    dmem[3] = 4;
+
+    // v2 = {10,20,30,40}
+    dmem[4] = 10;
+    dmem[5] = 20;
+    dmem[6] = 30;
+    dmem[7] = 40;
+
+    // ============================================================
+    // DATOS FLOAT
+    //
+    // byte 64:
+    // f1 = 3.0
+    // f2 = 4.0
+    // f3 = 5.0
+    // f4 = 6.0
+    // ============================================================
+
+    dmem[16] = 0x40400000u; // 3.0f
+    dmem[17] = 0x40800000u; // 4.0f
+    dmem[18] = 0x40A00000u; // 5.0f
+    dmem[19] = 0x40C00000u; // 6.0f
+
+    const uint32_t F6_ADD = 0b000000;
+    const uint32_t F6_MUL = 0b100101;
+
+    const int BLOCKS = 32;
+
+    const int MUL_OPS = BLOCKS * 4;
+    const int FPU_OPS = BLOCKS * 4;
+    const int VEC_ARITH_OPS = BLOCKS * 4;
+
+    const int SPECIALIZED_OPS =
+        MUL_OPS + FPU_OPS + VEC_ARITH_OPS;
+
+    std::vector<uint16_t> prog;
+
+    auto push32 = [&](uint32_t w) {
+        prog.push_back(w & 0xFFFF);
+        prog.push_back(w >> 16);
+    };
+
+    auto push16 = [&](uint16_t h) {
+        prog.push_back(h);
+    };
+
+    // ============================================================
+    // SETUP ENTERO
+    // ============================================================
+
+    push32(i_type(
+        rv32i::Opcode::OP_IMM,
+        1,
+        F3A::ADD_SUB,
+        0,
+        2
+    ));
+
+    push32(i_type(
+        rv32i::Opcode::OP_IMM,
+        2,
+        F3A::ADD_SUB,
+        0,
+        3
+    ));
+
+    push32(i_type(
+        rv32i::Opcode::OP_IMM,
+        3,
+        F3A::ADD_SUB,
+        0,
+        4
+    ));
+
+    push32(i_type(
+        rv32i::Opcode::OP_IMM,
+        4,
+        F3A::ADD_SUB,
+        0,
+        5
+    ));
+
+    // ============================================================
+    // SETUP FPU
+    // ============================================================
+
+    push32(i_type(
+        rv32i::Opcode::LOAD_FP,
+        1,
+        rv32i::Funct3_FP_MEM::W,
+        0,
+        64
+    ));
+
+    push32(i_type(
+        rv32i::Opcode::LOAD_FP,
+        2,
+        rv32i::Funct3_FP_MEM::W,
+        0,
+        68
+    ));
+
+    push32(i_type(
+        rv32i::Opcode::LOAD_FP,
+        3,
+        rv32i::Funct3_FP_MEM::W,
+        0,
+        72
+    ));
+
+    push32(i_type(
+        rv32i::Opcode::LOAD_FP,
+        4,
+        rv32i::Funct3_FP_MEM::W,
+        0,
+        76
+    ));
+
+    // ============================================================
+    // SETUP VECTORIAL
+    // ============================================================
+
+    push32(enc_vsetvli(
+        6,
+        0,
+        VTYPE_E32_M1
+    ));
+
+    push32(enc_vec_mem(
+        rv32i::Opcode::LOAD_FP,
+        1,
+        0
+    ));
+
+    push32(i_type(
+        rv32i::Opcode::OP_IMM,
+        5,
+        F3A::ADD_SUB,
+        0,
+        16
+    ));
+
+    push32(enc_vec_mem(
+        rv32i::Opcode::LOAD_FP,
+        2,
+        5
+    ));
+
+    // ============================================================
+    // KERNEL MIXTO
+    //
+    // Cada bloque:
+    //
+    // 4 MUL entero
+    // 4 FPU ADD/MUL
+    // 4 RVV VMUL/VADD
+    //
+    // Todas las fuentes son constantes e independientes.
+    // Los destinos se reutilizan para mantener presion de renombrado.
+    // ============================================================
+
+    for (int i = 0; i < BLOCKS; i++) {
+
+        // --------------------------------------------------------
+        // MUL ESCALAR
+        // --------------------------------------------------------
+
+        push32(r_type(
+            rv32i::Opcode::OP,
+            10,
+            F3M::MUL,
+            1,
+            2,
+            rv32i::Funct7::MULDIV
+        ));
+
+        push32(r_type(
+            rv32i::Opcode::OP,
+            11,
+            F3M::MUL,
+            3,
+            4,
+            rv32i::Funct7::MULDIV
+        ));
+
+        push32(r_type(
+            rv32i::Opcode::OP,
+            12,
+            F3M::MUL,
+            1,
+            4,
+            rv32i::Funct7::MULDIV
+        ));
+
+        push32(r_type(
+            rv32i::Opcode::OP,
+            13,
+            F3M::MUL,
+            2,
+            3,
+            rv32i::Funct7::MULDIV
+        ));
+
+        // --------------------------------------------------------
+        // FPU ESCALAR
+        // --------------------------------------------------------
+
+        // f10 = 3 * 4 = 12
+        push32(r_type(
+            rv32i::Opcode::OP_FP,
+            10,
+            0,
+            1,
+            2,
+            F7F::FMUL_S
+        ));
+
+        // f11 = 5 + 6 = 11
+        push32(r_type(
+            rv32i::Opcode::OP_FP,
+            11,
+            0,
+            3,
+            4,
+            F7F::FADD_S
+        ));
+
+        // f12 = 5 * 4 = 20
+        push32(r_type(
+            rv32i::Opcode::OP_FP,
+            12,
+            0,
+            3,
+            2,
+            F7F::FMUL_S
+        ));
+
+        // f13 = 3 + 6 = 9
+        push32(r_type(
+            rv32i::Opcode::OP_FP,
+            13,
+            0,
+            1,
+            4,
+            F7F::FADD_S
+        ));
+
+        // --------------------------------------------------------
+        // RVV
+        // --------------------------------------------------------
+
+        // v6 = v1 * v1
+        push32(enc_op_v(
+            F6_MUL,
+            1,
+            1,
+            rvv_f3_opmvv,
+            6
+        ));
+
+        // v7 = v2 + v2
+        push32(enc_op_v(
+            F6_ADD,
+            2,
+            2,
+            rvv_f3_opivv,
+            7
+        ));
+
+        // v8 = v1 * v2
+        push32(enc_op_v(
+            F6_MUL,
+            1,
+            2,
+            rvv_f3_opmvv,
+            8
+        ));
+
+        // v9 = v1 + v2
+        push32(enc_op_v(
+            F6_ADD,
+            1,
+            2,
+            rvv_f3_opivv,
+            9
+        ));
+    }
+
+    // Sentinel.
+    push16(0x0000);
+
+    // ============================================================
+    // CARGAR PROGRAMA EN IMEM
+    // ============================================================
+
+    for (size_t i = 0; i < prog.size(); i++) {
+        uint32_t w = imem[i / 2].to_uint();
+
+        if ((i & 1) == 0)
+            w = (w & 0xFFFF0000u) | prog[i];
+        else
+            w = (w & 0x0000FFFFu) |
+                (uint32_t(prog[i]) << 16);
+
+        imem[i / 2] = w;
+    }
+
+    // ============================================================
+    // SE?ALES
+    // ============================================================
+
+    ap_uint<1> dv;
+    ap_uint<3> dt;
+    ap_uint<32> dp;
+
+    ap_uint<1> a0d,a1d,mdd,fpd,lsd,brd,vcd;
+    ap_uint<3> a0t,a1t,mdt,fpt,lst,brt,vct;
+
+    ap_uint<1> cv,cfp;
+    ap_uint<5> crd;
+    ap_uint<32> cval;
+
+    static ap_uint<32> vo[OOO_VEC_REGFILE_LEN];
+    ap_uint<1> halted;
+
+    // Valores finales observados por commit.
+    uint32_t int_last[4] = {0,0,0,0};
+    uint32_t fp_last[4]  = {0,0,0,0};
+
+    bool int_seen[4] = {false,false,false,false};
+    bool fp_seen[4]  = {false,false,false,false};
+
+    // Reset.
+    riscv_soc_tick(
+        1, imem, dmem,
+        dv,dt,dp,
+        a0d,a0t,a1d,a1t,
+        mdd,mdt,fpd,fpt,
+        lsd,lst,brd,brt,vcd,vct,
+        cv,cfp,crd,cval,
+        vo,halted
+    );
+
+    int ticks = 0;
+    int dispatches = 0;
+    int commits = 0;
+
+    int mul_completions = 0;
+    int fpu_completions = 0;
+    int vec_completions = 0;
+
+    const int MAX_TICKS = 20000;
+
+    while (!halted && ticks < MAX_TICKS) {
+        ticks++;
+
+        riscv_soc_tick(
+            0, imem, dmem,
+            dv,dt,dp,
+            a0d,a0t,a1d,a1t,
+            mdd,mdt,fpd,fpt,
+            lsd,lst,brd,brt,vcd,vct,
+            cv,cfp,crd,cval,
+            vo,halted
+        );
+
+        if (dv) dispatches++;
+        if (cv) commits++;
+
+        if (mdd) mul_completions++;
+        if (fpd) fpu_completions++;
+        if (vcd) vec_completions++;
+
+        if (cv) {
+            int rd = crd.to_uint();
+
+            if (rd >= 10 && rd <= 13) {
+                int idx = rd - 10;
+
+                if (cfp) {
+                    fp_last[idx] = cval.to_uint();
+                    fp_seen[idx] = true;
+                } else {
+                    int_last[idx] = cval.to_uint();
+                    int_seen[idx] = true;
+                }
+            }
+        }
+    }
+
+    int fails = 0;
+
+    if (!halted) {
+        printf("FAIL  MIXED benchmark no termino\n");
+        fails++;
+    }
+
+    // ============================================================
+    // VALIDACION ENTERA
+    // ============================================================
+
+    const uint32_t exp_int[4] = {
+        6,
+        20,
+        10,
+        12
+    };
+
+    for (int i = 0; i < 4; i++) {
+        if (!int_seen[i] || int_last[i] != exp_int[i]) {
+            printf(
+                "FAIL  x%d=%u esperado=%u\n",
+                i + 10,
+                int_last[i],
+                exp_int[i]
+            );
+
+            fails++;
+        }
+    }
+
+    // ============================================================
+    // VALIDACION FPU
+    //
+    // f10 = 12.0 = 0x41400000
+    // f11 = 11.0 = 0x41300000
+    // f12 = 20.0 = 0x41A00000
+    // f13 =  9.0 = 0x41100000
+    // ============================================================
+
+    const uint32_t exp_fp[4] = {
+        0x41400000u,
+        0x41300000u,
+        0x41A00000u,
+        0x41100000u
+    };
+
+    for (int i = 0; i < 4; i++) {
+        if (!fp_seen[i] || fp_last[i] != exp_fp[i]) {
+            printf(
+                "FAIL  f%d=0x%08X esperado=0x%08X\n",
+                i + 10,
+                fp_last[i],
+                exp_fp[i]
+            );
+
+            fails++;
+        }
+    }
+
+    // ============================================================
+    // VALIDACION VECTORIAL
+    // ============================================================
+
+    const uint32_t exp_v6[4] = {1,4,9,16};
+    const uint32_t exp_v7[4] = {20,40,60,80};
+    const uint32_t exp_v8[4] = {10,40,90,160};
+    const uint32_t exp_v9[4] = {11,22,33,44};
+
+    for (int lane = 0; lane < 4; lane++) {
+
+        uint32_t v6 =
+            vo[6 * OOO_VEC_LANES + lane].to_uint();
+
+        uint32_t v7 =
+            vo[7 * OOO_VEC_LANES + lane].to_uint();
+
+        uint32_t v8 =
+            vo[8 * OOO_VEC_LANES + lane].to_uint();
+
+        uint32_t v9 =
+            vo[9 * OOO_VEC_LANES + lane].to_uint();
+
+        if (v6 != exp_v6[lane]) fails++;
+        if (v7 != exp_v7[lane]) fails++;
+        if (v8 != exp_v8[lane]) fails++;
+        if (v9 != exp_v9[lane]) fails++;
+    }
+
+    // Los dos VLE del setup tambien producen completion vectorial.
+    int vec_arith_completions =
+        vec_completions >= 2
+        ? vec_completions - 2
+        : 0;
+
+    double ipc =
+        ticks > 0
+        ? (double)commits / (double)ticks
+        : 0.0;
+
+    double specialized_per_tick =
+        ticks > 0
+        ? (double)SPECIALIZED_OPS / (double)ticks
+        : 0.0;
+
+    printf("\n");
+    printf("============================================================\n");
+    printf(" MIXED MUL + FPU + VRAT BENCHMARK\n");
+    printf("============================================================\n");
+
+    printf(" blocks                 : %d\n", BLOCKS);
+    printf(" MUL ops                : %d\n", MUL_OPS);
+    printf(" FPU ops                : %d\n", FPU_OPS);
+    printf(" vector arith ops       : %d\n", VEC_ARITH_OPS);
+    printf(" specialized ops        : %d\n", SPECIALIZED_OPS);
+
+    printf(" ticks                  : %d\n", ticks);
+    printf(" dispatches             : %d\n", dispatches);
+    printf(" commits                : %d\n", commits);
+
+    printf(" MUL completions        : %d\n", mul_completions);
+    printf(" FPU completions        : %d\n", fpu_completions);
+    printf(" vector completions     : %d\n", vec_completions);
+    printf(" vector arith completed : %d\n", vec_arith_completions);
+
+    printf(" IPC                    : %.6f\n", ipc);
+    printf(" specialized ops/tick   : %.6f\n", specialized_per_tick);
+
+    printf(" correctness            : %s\n",
+           fails == 0 ? "PASS" : "FAIL");
+
+    printf("============================================================\n");
+
+    return fails;
+}
